@@ -4,7 +4,7 @@ import datetime # 提供操作日期和时间的类
 import numpy as np
 import json
 import os
-from time_func import convert_time_stamp 
+from funcs import convert_time_stamp 
 from user_behavior_global import gen_user_feature_last_14day_global,gen_user_feature_global_realtime 
 from user_behavior_local import gen_stat_feature_last_xhours_local,gen_action_list_feature_last_xhours_local 
 

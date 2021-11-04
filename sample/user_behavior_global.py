@@ -2,7 +2,7 @@
 import time
 import datetime # 提供操作日期和时间的类
 import numpy as np
-from time_func import convert_time_stamp 
+from funcs import convert_time_stamp, binary_search 
 import json
 import copy
 
@@ -226,13 +226,13 @@ def gen_user_feature_global_realtime(user_behavior_dict_1day_global_realtime, us
 
   user_action_dict = user_behavior_dict_1day_global_realtime[userid][date][action_type][dim]
   act_num = len(user_action_dict)
-  for i in range(act_num):
+
+  split = binary_search(user_action_dict, time_stamp)
+  for i in range(split):
     user_action = user_action_dict[i]
     fields = user_action.split(":")
     action_time_stamp = fields[0]
     action_object = fields[1]
-    if (action_time_stamp >= time_stamp):
-      break
 
     latest_1_fea = action_object
     latest_num_feas_dict[action_object] = 1

@@ -3,6 +3,20 @@ import numpy as np
 from time_func import convert_time_stamp 
 import datetime
 
+#二分查找，找到不比key小并且距离key最近的数组下标
+def binary_search(data_dict, key):
+  left = 0
+  right = len(data_dict) - 1
+  while (left <= right):
+    mid = int((left+right)/2)
+    data = data_dict[mid]
+    if (data >= key):
+      right = mid - 1
+    else:
+      left = mid + 1
+
+  return left
+
 def sort_by_value(d): 
   items=d.items() 
   backitems=[[v[1],v[0]] for v in items] 
@@ -93,3 +107,9 @@ if __name__ == '__main__':
   print("orig:", datas)
   datas.sort()
   print("sorted:", datas)
+
+  datas = [1,3,5,7]
+  print("datas:", datas)
+  for i in range(10):
+    index = binary_search(datas, i)
+    print("binary_search:", i,  index)

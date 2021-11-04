@@ -2,7 +2,7 @@
 import time
 import datetime # 提供操作日期和时间的类
 import numpy as np
-from time_func import convert_time_stamp 
+from funcs import convert_time_stamp, binary_search 
 import json
 
 #从已经按照时间排好序的用户行为序列中找到time_stamp之前的累计曝光/点击次数
@@ -10,50 +10,45 @@ def action_stat_from_seqs(user_action_dict, time_stamp):
   act_num = len(user_action_dict)
   shows = 0
   clks = 0
-  for i in range(act_num):
+  split = binary_search(user_action_dict, time_stamp)
+  for i in range(split):
     user_action = user_action_dict[i]
     fields = user_action.split(":")
     action_time_stamp = fields[0]
     object_id = fields[1]
     clk = int(fields[2])
-    if (action_time_stamp >= time_stamp):
-      break
-    else:
-      shows += 1
-      clks += clk
+    shows += 1
+    clks += clk
   return shows, clks
 
 #从已经按照时间排好序的用户行为序列中找到time_stamp之前的no点击、点击list
 def gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, click_dict):
   act_num = len(user_action_dict)
   last_click = ""
-  for i in range(act_num):
+  split = binary_search(user_action_dict, time_stamp)
+  for i in range(split):
     user_action = user_action_dict[i]
     fields = user_action.split(":")
     action_time_stamp = fields[0]
     object_id = fields[1]
     clk = int(fields[2])
-    if (action_time_stamp >= time_stamp):
-      break
-    else:
-      #if (clk == 1) and object_id not in click_dict:
-      #  click_dict.append(object_id)
-      #if (clk == 0) and object_id not in non_click_dict:
-      #  non_click_dict.append(object_id)
+    #if (clk == 1) and object_id not in click_dict:
+    #  click_dict.append(object_id)
+    #if (clk == 0) and object_id not in non_click_dict:
+    #  non_click_dict.append(object_id)
 
+    #  不进行去重
+    if (clk == 1):
       last_click = object_id
-
-      #  不进行去重
-      if (clk == 1):
-        if object_id not in click_dict:
-          click_dict[object_id]=1
-        else:
-          click_dict[object_id]+=1
+      if object_id not in click_dict:
+        click_dict[object_id]=1
       else:
-        if object_id not in non_click_dict:
-          non_click_dict[object_id]=1
-        else:
-          non_click_dict[object_id]+=1
+        click_dict[object_id]+=1
+    else:
+      if object_id not in non_click_dict:
+        non_click_dict[object_id]=1
+      else:
+        non_click_dict[object_id]+=1
 
   return last_click
 
@@ -181,13 +176,17 @@ def gen_action_list_feature_last_xhours_local(behavior_local_dict_realtime, id, 
 
     if id in behavior_local_dict_realtime and new_date in behavior_local_dict_realtime[id] and new_tm_hour in behavior_local_dict_realtime[id][new_date]:
       user_action_dict = behavior_local_dict_realtime[id][new_date][new_tm_hour]["behavior_list"]
-      last_click = gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, click_dict)
+      last_click_tmp = gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, click_dict)
+      if last_click_tmp != "":
+        last_click = last_click_tmp
       #print("other hour")
       #print(id, new_date, new_tm_hour, non_click_dict, click_dict)
 
   if id in behavior_local_dict_realtime and date in behavior_local_dict_realtime[id] and tm_hour in behavior_local_dict_realtime[id][date]:
     user_action_dict = behavior_local_dict_realtime[id][date][tm_hour]["behavior_list"]
-    last_click = gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, click_dict)
+    last_click_tmp = gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, click_dict)
+    if last_click_tmp != "":
+      last_click = last_click_tmp
     #print("this hour")
     #print(id, date, tm_hour, non_click_dict, click_dict)
   

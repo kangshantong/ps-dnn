@@ -2,6 +2,22 @@
 import time
 import datetime # 提供操作日期和时间的类
 
+#二分查找，找到比time_stamp小并且距离time_stamp最近的数组下标
+def binary_search(user_action_dict, time_stamp):
+  left = 0
+  right = len(user_action_dict) - 1
+  while (left <= right):
+    mid = int((left+right)/2)
+    user_action = user_action_dict[mid]
+    fields = user_action.split(":")
+    action_time_stamp = fields[0]
+    if (action_time_stamp >= time_stamp):
+      right = mid - 1
+    else:
+      left = mid + 1
+
+  return left
+
 def convert_time_stamp(time_stamp):
   time_stamp  = int(time_stamp)
   tm_year = time.localtime(time_stamp).tm_year

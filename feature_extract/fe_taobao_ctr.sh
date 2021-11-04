@@ -15,4 +15,4 @@ echo "demo fea stage2"
 
 echo "Feature extract for "$version
 
-python3 feature_extract.py $version $min_fea_freq 2>&1|tee fe.log
+python3 feature_extract.py $version $min_fea_freq
