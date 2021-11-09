@@ -2,6 +2,8 @@
 import time
 import datetime # 提供操作日期和时间的类
 
+mins_range=15
+
 #二分查找，找到比time_stamp小并且距离time_stamp最近的数组下标
 def binary_search(user_action_dict, time_stamp):
   left = 0
@@ -30,7 +32,9 @@ def convert_time_stamp(time_stamp):
   
   workdayflag =1 if tm_wday<=4 else 0
 
-  return tm_year, tm_mon, tm_mday, workdayflag, tm_hour
+  tm_min_range = int(tm_min/mins_range)
+
+  return tm_year, tm_mon, tm_mday, workdayflag, str(tm_hour), str(tm_min_range)
 
 
 
@@ -44,3 +48,6 @@ if __name__ == '__main__':
   time_format = date.strftime('%Y%m%d')
   print (date)
   print (time_format)
+  print(convert_time_stamp(1635163315))
+  print(convert_time_stamp(1635164898))
+  print(convert_time_stamp(1635166740))

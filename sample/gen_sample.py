@@ -188,6 +188,7 @@ if __name__ == '__main__':
   load_behavior_fea_dict("final_data/ad_behavior_local_dict_realtime", ad_behavior_local_dict_realtime)
   print(gen_stat_feature_last_xhours_local(ad_behavior_local_dict_realtime, "1", "1494137645", 24))
 
+
   #raw_sample 格式:user,time_stamp,adgroup_id,pid,nonclk,clk
   with open("final_data/raw_sample_shuffle.csv", 'r') as input_data, \
        open("final_data/train_data", 'w+') as train_data, \
@@ -249,8 +250,8 @@ if __name__ == '__main__':
       #5.global 实时特征
       for action_type in ["pv", "fav", "cart", "buy"]:
         for dim in ["cate", "brand"]:
-          latest_num_feas, latest_1_fea = gen_user_feature_global_realtime(user_behavior_1day_global_realtime, userid, time_stamp, action_type, dim)
-          sample.append(",".join(latest_num_feas))
+          latest_n_feas, latest_1_fea = gen_user_feature_global_realtime(user_behavior_1day_global_realtime, userid, time_stamp, action_type, dim)
+          sample.append(",".join(latest_n_feas))
           sample.append(latest_1_fea)
 
       #6.local 统计特征

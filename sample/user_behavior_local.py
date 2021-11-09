@@ -2,8 +2,17 @@
 import time
 import datetime # 提供操作日期和时间的类
 import numpy as np
-from funcs import convert_time_stamp, binary_search 
+from funcs import mins_range, convert_time_stamp, binary_search
 import json
+
+#merge_dict_1level将dict_b merge到dict a上
+#dict_a、dict_b为1级索引，末级节点为整数，for ex:dict_a["iphone"]=2
+def merge_dict_1level(dict_a, dict_b):
+  for btag in dict_b:
+    if btag not in dict_a:
+      dict_a[btag] = dict_b[btag]
+    else:
+      dict_a[btag] += dict_b[btag]
 
 #从已经按照时间排好序的用户行为序列中找到time_stamp之前的累计曝光/点击次数
 def action_stat_from_seqs(user_action_dict, time_stamp):
@@ -22,7 +31,7 @@ def action_stat_from_seqs(user_action_dict, time_stamp):
   return shows, clks
 
 #从已经按照时间排好序的用户行为序列中找到time_stamp之前的no点击、点击list
-def gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, click_dict):
+def gen_action_list_from_seqs(user_action_dict, time_stamp, shows, clks):
   act_num = len(user_action_dict)
   last_click = ""
   split = binary_search(user_action_dict, time_stamp)
@@ -32,28 +41,24 @@ def gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, clic
     action_time_stamp = fields[0]
     object_id = fields[1]
     clk = int(fields[2])
-    #if (clk == 1) and object_id not in click_dict:
-    #  click_dict.append(object_id)
-    #if (clk == 0) and object_id not in non_click_dict:
-    #  non_click_dict.append(object_id)
 
     #  不进行去重
     if (clk == 1):
       last_click = object_id
-      if object_id not in click_dict:
-        click_dict[object_id]=1
+      if object_id not in clks:
+        clks[object_id]=1
       else:
-        click_dict[object_id]+=1
+        clks[object_id]+=1
     else:
-      if object_id not in non_click_dict:
-        non_click_dict[object_id]=1
+      if object_id not in shows:
+        shows[object_id]=1
       else:
-        non_click_dict[object_id]+=1
+        shows[object_id]+=1
 
   return last_click
 
-#将用户/广告的行为按照userid*日期*小时*时间戳*点击标记，存储起来
-def add_behavior_local_dict_realtime(behavior_local_dict_realtime,id,object_id,date,tm_hour,time_stamp,clk):
+#将用户/广告的行为按照userid*日期*小时*时间戳*点击标记，存储起来;cache_behaviors表示是否将click行为收集起来并单独缓存
+def add_behavior_local_dict_realtime(behavior_local_dict_realtime,id,object_id,date,tm_hour,time_stamp,clk,cache_behaviors=False):
 
   if id not in behavior_local_dict_realtime:
     behavior_local_dict_realtime[id] = {}
@@ -63,14 +68,37 @@ def add_behavior_local_dict_realtime(behavior_local_dict_realtime,id,object_id,d
 
   if tm_hour not in behavior_local_dict_realtime[id][date]:
     behavior_local_dict_realtime[id][date][tm_hour] = {}
+
     behavior_local_dict_realtime[id][date][tm_hour]["show"] = 0
     behavior_local_dict_realtime[id][date][tm_hour]["click"] = 0
-    behavior_local_dict_realtime[id][date][tm_hour]["behavior_list"] = []
+    behavior_local_dict_realtime[id][date][tm_hour]["behaviors"] = []
+
+    if cache_behaviors == True:
+      behavior_local_dict_realtime[id][date][tm_hour]["final_click_time"] = ""
+      behavior_local_dict_realtime[id][date][tm_hour]["final_click_object"] = ""
+      behavior_local_dict_realtime[id][date][tm_hour]["clks"] = {}
+      behavior_local_dict_realtime[id][date][tm_hour]["shows"] = {}
 
   behavior_local_dict_realtime[id][date][tm_hour]["show"] += 1
   behavior_local_dict_realtime[id][date][tm_hour]["click"] += int(clk)
-  behavior = time_stamp + ":" + object_id + ":" + clk
-  behavior_local_dict_realtime[id][date][tm_hour]["behavior_list"].append(behavior)
+
+  if cache_behaviors == True:
+    if int(clk) > 0:
+      if behavior_local_dict_realtime[id][date][tm_hour]["final_click_object"] == "" or time_stamp > behavior_local_dict_realtime[id][date][tm_hour]["final_click_time"]: 
+        behavior_local_dict_realtime[id][date][tm_hour]["final_click_time"] = time_stamp
+        behavior_local_dict_realtime[id][date][tm_hour]["final_click_object"] = object_id
+      if object_id in behavior_local_dict_realtime[id][date][tm_hour]["clks"]:
+         behavior_local_dict_realtime[id][date][tm_hour]["clks"][object_id] += 1
+      else:
+         behavior_local_dict_realtime[id][date][tm_hour]["clks"][object_id] = 1
+    else:
+      if object_id in behavior_local_dict_realtime[id][date][tm_hour]["shows"]:
+         behavior_local_dict_realtime[id][date][tm_hour]["shows"][object_id] += 1
+      else:
+         behavior_local_dict_realtime[id][date][tm_hour]["shows"][object_id] = 1
+
+    behavior = time_stamp + ":" + str(object_id) + ":" + clk
+    behavior_local_dict_realtime[id][date][tm_hour]["behaviors"].append(behavior)
 
 def gen_local_behavior_dict_realtime(user_behavior_local_dict_realtime, ad_behavior_local_dict_realtime):
   count = 0
@@ -89,12 +117,11 @@ def gen_local_behavior_dict_realtime(user_behavior_local_dict_realtime, ad_behav
       nonclk = fields[4]
       clk = fields[5]
 
-      tm_year, tm_mon, tm_mday, workdayflag, tm_hour = convert_time_stamp(time_stamp)
+      tm_year, tm_mon, tm_mday, workdayflag, tm_hour, tm_min_range = convert_time_stamp(time_stamp)
       date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
-      tm_hour = str(tm_hour)
 
-      add_behavior_local_dict_realtime(user_behavior_local_dict_realtime,userid,adgroup_id,date,tm_hour,time_stamp,clk)
-      add_behavior_local_dict_realtime(ad_behavior_local_dict_realtime,adgroup_id,userid,date,tm_hour,time_stamp,clk)
+      add_behavior_local_dict_realtime(user_behavior_local_dict_realtime,userid,adgroup_id,date,tm_hour,time_stamp,clk,cache_behaviors=True)
+      add_behavior_local_dict_realtime(ad_behavior_local_dict_realtime,adgroup_id,userid,date,tm_hour,time_stamp,clk,cache_behaviors=False)
 
       line = input_data.readline()
       
@@ -106,12 +133,12 @@ def gen_local_behavior_dict_realtime(user_behavior_local_dict_realtime, ad_behav
   for userid in user_behavior_local_dict_realtime:
     for date in user_behavior_local_dict_realtime[userid]:
       for tm_hour in user_behavior_local_dict_realtime[userid][date]:
-        (user_behavior_local_dict_realtime[userid][date][tm_hour]["behavior_list"]).sort()
+        (user_behavior_local_dict_realtime[userid][date][tm_hour]["behaviors"]).sort()
 
   for adgroup_id in ad_behavior_local_dict_realtime:
     for date in ad_behavior_local_dict_realtime[adgroup_id]:
       for tm_hour in ad_behavior_local_dict_realtime[adgroup_id][date]:
-        (ad_behavior_local_dict_realtime[adgroup_id][date][tm_hour]["behavior_list"]).sort()
+        (ad_behavior_local_dict_realtime[adgroup_id][date][tm_hour]["behaviors"]).sort()
 
 #提取出指定用户或者广告在过去x个小时的show、click、ctr
 def gen_stat_feature_last_xhours_local(behavior_local_dict_realtime, id, time_stamp, hours):
@@ -120,8 +147,6 @@ def gen_stat_feature_last_xhours_local(behavior_local_dict_realtime, id, time_st
 
   tm_year, tm_mon, tm_mday, workdayflag, tm_hour = convert_time_stamp(time_stamp)
   date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
-  tm_hour = str(tm_hour)
-  #print("behavior_local_dict_realtime:", behavior_local_dict_realtime)
   #print("id:",id)
   #print("date:",date)
   #print("tm_hour:",tm_hour)
@@ -132,7 +157,6 @@ def gen_stat_feature_last_xhours_local(behavior_local_dict_realtime, id, time_st
     new_time_stamp = int(time_stamp) - i*3600
     new_tm_year, new_tm_mon, new_tm_mday, new_workdayflag, new_tm_hour = convert_time_stamp(str(new_time_stamp))
     new_date = (datetime.datetime(new_tm_year, new_tm_mon, new_tm_mday)).strftime('%Y%m%d')
-    new_tm_hour = str(new_tm_hour)
 
     if id in behavior_local_dict_realtime and new_date in behavior_local_dict_realtime[id] and new_tm_hour in behavior_local_dict_realtime[id][new_date]:
       total_show +=  behavior_local_dict_realtime[id][new_date][new_tm_hour]['show']
@@ -141,25 +165,23 @@ def gen_stat_feature_last_xhours_local(behavior_local_dict_realtime, id, time_st
       #print(id, new_date, new_tm_hour, total_show,  total_clk)
 
   if id in behavior_local_dict_realtime and date in behavior_local_dict_realtime[id] and tm_hour in behavior_local_dict_realtime[id][date]:
-    #print("this hour")
-    show_this_hour, clk_this_hour = action_stat_from_seqs(behavior_local_dict_realtime[id][date][tm_hour]["behavior_list"], time_stamp)
-    #print(show_this_hour, clk_this_hour)
+    show_this_hour, clk_this_hour = action_stat_from_seqs(behavior_local_dict_realtime[id][date][tm_hour]["behaviors"], time_stamp)
     total_show += show_this_hour
-    total_clk += total_clk
-
+    total_clk += clk_this_hour
+    #print("this hour")
+    #print(show_this_hour, clk_this_hour)
 
   return total_show, total_clk, total_clk*1.0/(total_show+10)
 
 #提取出指定用户或者广告在过去x个小时访问list,按照访问时间顺序升序排列
 def gen_action_list_feature_last_xhours_local(behavior_local_dict_realtime, id, time_stamp, hours):
 
-  non_click_dict = {}
-  click_dict = {}
+  shows = {}
+  clks = {}
   last_click = ""
 
-  tm_year, tm_mon, tm_mday, workdayflag, tm_hour = convert_time_stamp(time_stamp)
+  tm_year, tm_mon, tm_mday, workdayflag, tm_hour, tm_min_range = convert_time_stamp(time_stamp)
   date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
-  tm_hour = str(tm_hour)
   #print("behavior_local_dict_realtime:", behavior_local_dict_realtime)
   #print("id:",id)
   #print("date:",date)
@@ -172,25 +194,27 @@ def gen_action_list_feature_last_xhours_local(behavior_local_dict_realtime, id, 
     new_time_stamp = int(time_stamp) - i*3600
     new_tm_year, new_tm_mon, new_tm_mday, new_workdayflag, new_tm_hour = convert_time_stamp(str(new_time_stamp))
     new_date = (datetime.datetime(new_tm_year, new_tm_mon, new_tm_mday)).strftime('%Y%m%d')
-    new_tm_hour = str(new_tm_hour)
 
     if id in behavior_local_dict_realtime and new_date in behavior_local_dict_realtime[id] and new_tm_hour in behavior_local_dict_realtime[id][new_date]:
-      user_action_dict = behavior_local_dict_realtime[id][new_date][new_tm_hour]["behavior_list"]
-      last_click_tmp = gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, click_dict)
+      user_action_dict_1hour = behavior_local_dict_realtime[id][new_date][new_tm_hour]
+      merge_dict_1level(shows, user_action_dict_1hour["shows"])
+      merge_dict_1level(clks, user_action_dict_1hour["clks"])
+
+      last_click_tmp = user_action_dict_1hour["final_click_object"]
       if last_click_tmp != "":
         last_click = last_click_tmp
       #print("other hour")
-      #print(id, new_date, new_tm_hour, non_click_dict, click_dict)
+      #print(id, new_date, new_tm_hour, shows, clks)
 
   if id in behavior_local_dict_realtime and date in behavior_local_dict_realtime[id] and tm_hour in behavior_local_dict_realtime[id][date]:
-    user_action_dict = behavior_local_dict_realtime[id][date][tm_hour]["behavior_list"]
-    last_click_tmp = gen_action_list_from_seqs(user_action_dict, time_stamp, non_click_dict, click_dict)
+    user_action_dict = behavior_local_dict_realtime[id][date][tm_hour]["behaviors"]
+    last_click_tmp = gen_action_list_from_seqs(user_action_dict, time_stamp, shows, clks)
     if last_click_tmp != "":
       last_click = last_click_tmp
     #print("this hour")
-    #print(id, date, tm_hour, non_click_dict, click_dict)
+    #print(id, date, tm_hour, shows, clks)
   
-  return non_click_dict, click_dict, last_click
+  return shows, clks, last_click
 
 if __name__ == '__main__':
   user_behavior_local_dict_realtime = {}

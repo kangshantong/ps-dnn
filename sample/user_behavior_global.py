@@ -13,9 +13,9 @@ def sort_by_value(d):
   backitems.sort(reverse=True) 
   return [ backitems[i][1] for i in range(0,len(backitems))] 
 
-#copy_dict将dict_b copy到dict a上
+#copy_dict_3level将dict_b copy到dict a上
 #dict_a、dict_b为三级索引，末级节点为整数，for ex:dict_a["buy"]["cate"]["phone"]=2
-def copy_dict(dict_a, dict_b):
+def copy_dict_3level(dict_a, dict_b):
   dict_a = {}
   for btag in dict_b:
     dict_a[btag] = {}
@@ -24,9 +24,9 @@ def copy_dict(dict_a, dict_b):
       for ele in dict_b[btag][dim]:
         dict_a[btag][dim][ele] = dict_b[btag][dim][ele]
 
-#merge_dict将dict_b merge到dict a上
+#merge_dict_3level将dict_b merge到dict a上
 #dict_a、dict_b为三级索引，末级节点为整数，for ex:dict_a["buy"]["cate"]["phone"]=2
-def merge_dict(dict_a, dict_b):
+def merge_dict_3level(dict_a, dict_b):
   for btag in dict_b:
     if btag not in dict_a:
       dict_a[btag] = {}
@@ -39,9 +39,9 @@ def merge_dict(dict_a, dict_b):
         else:
           dict_a[btag][dim][ele] += dict_b[btag][dim][ele]
 
-#cut_dict将dict b 从dict a中移走
+#cut_dict_3level将dict b 从dict a中移走
 #dict_a、dict_b为三级索引，末级节点为整数，for ex:dict_a["buy"]["cate"]["phone"]=2
-def cut_dict(dict_a, dict_b):
+def cut_dict_3level(dict_a, dict_b):
   for btag in dict_b:
     for dim in dict_b[btag]:
       for ele in dict_b[btag][dim]:
@@ -128,7 +128,7 @@ def gen_user_behavior_1day_global(user_behavior_dict_1day_global, user_behavior_
       btag = fields[2]
       cate = fields[3]
       brand = fields[4]
-      tm_year, tm_mon, tm_mday, workdayflag, tm_hour = convert_time_stamp(time_stamp)
+      tm_year, tm_mon, tm_mday, workdayflag, tm_hour, tm_min_range = convert_time_stamp(time_stamp)
       date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
 
       add_user_behavior_dict_1day_global(user_behavior_dict_1day_global,userid,date,btag,cate,brand)
@@ -158,16 +158,16 @@ def gen_user_behavior_last_14day_global(user_behavior_dict_1day_global, user_beh
     for i in range(14):
       past_date = (datetime.datetime.strptime(start_date, '%Y%m%d') + datetime.timedelta(days=-(i+1))).strftime('%Y%m%d')
       if past_date in user_behavior_dict_1day_global[userid]:
-        merge_dict(temp_user_behavior_dict_last_14day_global, user_behavior_dict_1day_global[userid][past_date])
+        merge_dict_3level(temp_user_behavior_dict_last_14day_global, user_behavior_dict_1day_global[userid][past_date])
     user_behavior_dict_last_14day_global[userid][start_date] = copy.deepcopy(temp_user_behavior_dict_last_14day_global)  
 
     for date in ["20170507", "20170508", "20170509", "20170510", "20170511", "20170512", "20170513"]:
       past_15_date = (datetime.datetime.strptime(date, '%Y%m%d') + datetime.timedelta(days=-15)).strftime('%Y%m%d')
       if past_15_date in user_behavior_dict_1day_global[userid]:
-        cut_dict(temp_user_behavior_dict_last_14day_global, user_behavior_dict_1day_global[userid][past_15_date])
+        cut_dict_3level(temp_user_behavior_dict_last_14day_global, user_behavior_dict_1day_global[userid][past_15_date])
       past_1_date = (datetime.datetime.strptime(date, '%Y%m%d') + datetime.timedelta(days=-1)).strftime('%Y%m%d')
       if past_1_date in user_behavior_dict_1day_global[userid]:
-        merge_dict(temp_user_behavior_dict_last_14day_global, user_behavior_dict_1day_global[userid][past_1_date])
+        merge_dict_3level(temp_user_behavior_dict_last_14day_global, user_behavior_dict_1day_global[userid][past_1_date])
       user_behavior_dict_last_14day_global[userid][date] = copy.deepcopy(temp_user_behavior_dict_last_14day_global)
 
     #for date in ["20170506", "20170507", "20170508", "20170509", "20170510", "20170511", "20170512", "20170513"]:
@@ -180,7 +180,7 @@ def gen_user_behavior_last_14day_global(user_behavior_dict_1day_global, user_beh
     #      user_behavior_dict_last_14day_global[userid][date] = {}
 
     #    if past_date in user_behavior_dict_1day_global[userid]:
-    #      merge_dict(user_behavior_dict_last_14day_global[userid][date], user_behavior_dict_1day_global[userid][past_date])
+    #      merge_dict_3level(user_behavior_dict_last_14day_global[userid][date], user_behavior_dict_1day_global[userid][past_date])
 
     count += 1
     if count%10000 == 0:
@@ -208,21 +208,21 @@ def gen_user_feature_last_14day_global(user_behavior_dict_last_14day_global, use
 
 #提取出指定用户在指定日期、指定行为类型（pv/fav/cart/buy）上最近访问过的cate或者brand
 def gen_user_feature_global_realtime(user_behavior_dict_1day_global_realtime, userid, time_stamp, action_type, dim):
-  latest_num_feas_dict = {}
-  latest_num_feas = []
+  latest_n_feas_dict = {}
+  latest_n_feas = []
   latest_1_fea = ""
 
-  tm_year, tm_mon, tm_mday, workdayflag, tm_hour = convert_time_stamp(time_stamp)
+  tm_year, tm_mon, tm_mday, workdayflag, tm_hour, tm_min_range = convert_time_stamp(time_stamp)
   date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
 
   if userid not in user_behavior_dict_1day_global_realtime:
-    return latest_num_feas, latest_1_fea
+    return latest_n_feas, latest_1_fea
   if date not in user_behavior_dict_1day_global_realtime[userid]:
-    return latest_num_feas, latest_1_fea
+    return latest_n_feas, latest_1_fea
   if action_type not in user_behavior_dict_1day_global_realtime[userid][date]:
-    return latest_num_feas, latest_1_fea
+    return latest_n_feas, latest_1_fea
   if dim not in user_behavior_dict_1day_global_realtime[userid][date][action_type]:
-    return latest_num_feas, latest_1_fea
+    return latest_n_feas, latest_1_fea
 
   user_action_dict = user_behavior_dict_1day_global_realtime[userid][date][action_type][dim]
   act_num = len(user_action_dict)
@@ -235,13 +235,13 @@ def gen_user_feature_global_realtime(user_behavior_dict_1day_global_realtime, us
     action_object = fields[1]
 
     latest_1_fea = action_object
-    latest_num_feas_dict[action_object] = 1
-    #if action_object not in latest_num_feas:
-    #  latest_num_feas.append(action_object)
+    latest_n_feas_dict[action_object] = 1
+    #if action_object not in latest_n_feas:
+    #  latest_n_feas.append(action_object)
 
-  latest_num_feas = list(latest_num_feas_dict.keys())
+  latest_n_feas = list(latest_n_feas_dict.keys())
 
-  return latest_num_feas, latest_1_fea
+  return latest_n_feas, latest_1_fea
 
 if __name__ == '__main__':
   user_behavior_dict_1day_global = {}
