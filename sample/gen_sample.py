@@ -10,7 +10,7 @@ from user_behavior_local import gen_stat_feature_last_xhours_local,gen_action_li
 
 def load_basic_fea_dict(fea_dict_file, fea_dict, length):
   if not os.path.exists(fea_dict_file):
-    print("Error:", fea_dict_file, " dose not exists!!!")
+    print("Warning:", fea_dict_file, " dose not exists!!!")
     return
 
   with open(fea_dict_file, 'r') as f:
@@ -31,7 +31,7 @@ def load_basic_fea_dict(fea_dict_file, fea_dict, length):
 
 def load_behavior_fea_dict(fea_dict_file, fea_dict):
   if not os.path.exists(fea_dict_file):
-    print("Error:", fea_dict_file, " dose not exists!!!")
+    print("Warning:", fea_dict_file, " dose not exists!!!")
     return
 
   with open(fea_dict_file, 'r') as f:
@@ -207,19 +207,11 @@ if __name__ == '__main__':
       userid = fields[0]
       time_stamp = fields[1]
       adgroup_id = fields[2]
-      tm_year, tm_mon, tm_mday, workdayflag, tm_hour = convert_time_stamp(time_stamp)
-      date = datetime.datetime(tm_year, tm_mon, tm_mday).strftime('%Y%m%d')
-      tm_hour = str(tm_hour)
+      date, tm_hour = convert_time_stamp(int(time_stamp))
+      workdayflag = "0" #to be deleted
       
-      if date not in ["20170506", "20170507", "20170508", "20170509", "20170510", "20170511", "20170512", "20170513"]:
-        continue
-
       #准备样本
-      #样本格式为:user,time_stamp,adgroup_id,pid,nonclk,clk,workdayflag,tm_hour,\
-      #    cms_segid,cms_group_id,final_gender_code,age_level,pvalue_level,shopping_level,occupation,new_user_class_level,\
-      #    cate_id,campaign_id,customer,brand,price, \
-      #    pv_cate_last_14days,pv_brand_last_14days,fav_cate_last_14days,fav_brand_last_14days,\
-      #    cart_cate_last_14days,cart_brand_last_14days,buy_cate_last_14days,buy_brand_last_14days
+      #样本格式为:fields=user,time_stamp,adgroup_id,pid,nonclk,clk,workdayflag,tm_hour,cms_segid,cms_group_id,final_gender_code,age_level,pvalue_level,shopping_level,occupation,new_user_class_level,cate_id,campaign_id,customer,brand,price,pv_cate_last_14days,pv_brand_last_14days,fav_cate_last_14days,fav_brand_last_14days,cart_cate_last_14days,cart_brand_last_14days,buy_cate_last_14days,buy_brand_last_14days,pv_cate_global_latest_n,pv_cate_global_latest_1,pv_brand_global_latest_n,pv_brand_global_latest_1,fav_cate_global_latest_n,fav_cate_global_latest_1,fav_brand_global_latest_n,fav_brand_global_latest_1,cart_cate_global_latest_n,cart_cate_global_latest_1,cart_brand_global_latest_n,cart_brand_global_latest_1,buy_cate_global_latest_n,buy_cate_global_latest_1,buy_brand_global_latest_n,buy_brand_global_latest_1,user_show_last_24hour,user_click_last_24hour,user_ctr_last_24hour,ad_show_last_24hour,ad_click_last_24hour,ad_ctr_last_24hour,user_show_last_168hour,user_click_last_168hour,user_ctr_last_168hour,ad_show_last_168hour,ad_click_last_168hour,ad_ctr_last_168hour,user_click_local_aid_list_uniq_last_24hour,user_click_local_cate_id_list_uniq_last_24hour,user_click_local_brand_list_uniq_last_24hour,user_click_local_customer_list_uniq_last_24hour,user_last_click_local_aid_last_24hour,user_last_click_local_cate_id_last_24hour,user_last_click_local_brand_last_24hour,user_last_click_local_customer_last_24hour,user_click_local_this_ad_count_last_24hour,user_non_click_local_this_ad_count_last_24hour,user_click_local_aid_list_uniq_last_168hour,user_click_local_cate_id_list_uniq_last_168hour,user_click_local_brand_list_uniq_last_168hour,user_click_local_customer_list_uniq_last_168hour,user_last_click_local_aid_last_168hour,user_last_click_local_cate_id_last_168hour,user_last_click_local_brand_last_168hour,user_last_click_local_customer_last_168hour,user_click_local_this_ad_count_last_168hour,user_non_click_local_this_ad_count_last_168hour
       # 分隔符为"\t"
 
       #0.基本字段 
@@ -258,12 +250,12 @@ if __name__ == '__main__':
       gen_local_stat_feas(sample, user_behavior_local_dict_realtime, ad_behavior_local_dict_realtime, userid, adgroup_id, time_stamp, hours=24)
       gen_local_stat_feas(sample, user_behavior_local_dict_realtime, ad_behavior_local_dict_realtime, userid, adgroup_id, time_stamp, hours=168)
 
-      #7.local实时行为特征 
+      ##7.local实时行为特征 
       gen_local_behavior_feas(sample, user_behavior_local_dict_realtime, ad_fea_dict, userid, time_stamp, adgroup_id, hours=24)
       gen_local_behavior_feas(sample, user_behavior_local_dict_realtime, ad_fea_dict, userid, time_stamp, adgroup_id, hours=168)
 
       #样本取自5月6号-13号，将13号的数据作为测试集，其他数据作为训练集
-      if tm_mday != 13:
+      if date != "2017-05-13":
         train_data.write("\t".join(sample))
         train_data.write("\n")
       else:

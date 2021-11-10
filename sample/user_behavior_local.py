@@ -2,7 +2,7 @@
 import time
 import datetime # 提供操作日期和时间的类
 import numpy as np
-from funcs import mins_range, convert_time_stamp, binary_search
+from funcs import convert_time_stamp, binary_search
 import json
 
 #merge_dict_1level将dict_b merge到dict a上
@@ -117,8 +117,7 @@ def gen_local_behavior_dict_realtime(user_behavior_local_dict_realtime, ad_behav
       nonclk = fields[4]
       clk = fields[5]
 
-      tm_year, tm_mon, tm_mday, workdayflag, tm_hour, tm_min_range = convert_time_stamp(time_stamp)
-      date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
+      date, tm_hour = convert_time_stamp(int(time_stamp))
 
       add_behavior_local_dict_realtime(user_behavior_local_dict_realtime,userid,adgroup_id,date,tm_hour,time_stamp,clk,cache_behaviors=True)
       add_behavior_local_dict_realtime(ad_behavior_local_dict_realtime,adgroup_id,userid,date,tm_hour,time_stamp,clk,cache_behaviors=False)
@@ -145,8 +144,8 @@ def gen_stat_feature_last_xhours_local(behavior_local_dict_realtime, id, time_st
   total_show = 0
   total_clk = 0
 
-  tm_year, tm_mon, tm_mday, workdayflag, tm_hour = convert_time_stamp(time_stamp)
-  date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
+  date, tm_hour = convert_time_stamp(int(time_stamp))
+
   #print("id:",id)
   #print("date:",date)
   #print("tm_hour:",tm_hour)
@@ -155,8 +154,7 @@ def gen_stat_feature_last_xhours_local(behavior_local_dict_realtime, id, time_st
   #print(behavior_local_dict_realtime[id][date][tm_hour])
   for i in range(hours-1,0,-1):
     new_time_stamp = int(time_stamp) - i*3600
-    new_tm_year, new_tm_mon, new_tm_mday, new_workdayflag, new_tm_hour = convert_time_stamp(str(new_time_stamp))
-    new_date = (datetime.datetime(new_tm_year, new_tm_mon, new_tm_mday)).strftime('%Y%m%d')
+    new_date, new_tm_hour = convert_time_stamp(new_time_stamp)
 
     if id in behavior_local_dict_realtime and new_date in behavior_local_dict_realtime[id] and new_tm_hour in behavior_local_dict_realtime[id][new_date]:
       total_show +=  behavior_local_dict_realtime[id][new_date][new_tm_hour]['show']
@@ -180,8 +178,7 @@ def gen_action_list_feature_last_xhours_local(behavior_local_dict_realtime, id, 
   clks = {}
   last_click = ""
 
-  tm_year, tm_mon, tm_mday, workdayflag, tm_hour, tm_min_range = convert_time_stamp(time_stamp)
-  date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
+  date, tm_hour = convert_time_stamp(int(time_stamp))
   #print("behavior_local_dict_realtime:", behavior_local_dict_realtime)
   #print("id:",id)
   #print("date:",date)
@@ -192,8 +189,7 @@ def gen_action_list_feature_last_xhours_local(behavior_local_dict_realtime, id, 
 
   for i in range(hours-1,0,-1):
     new_time_stamp = int(time_stamp) - i*3600
-    new_tm_year, new_tm_mon, new_tm_mday, new_workdayflag, new_tm_hour = convert_time_stamp(str(new_time_stamp))
-    new_date = (datetime.datetime(new_tm_year, new_tm_mon, new_tm_mday)).strftime('%Y%m%d')
+    new_date, new_tm_hour = convert_time_stamp(new_time_stamp)
 
     if id in behavior_local_dict_realtime and new_date in behavior_local_dict_realtime[id] and new_tm_hour in behavior_local_dict_realtime[id][new_date]:
       user_action_dict_1hour = behavior_local_dict_realtime[id][new_date][new_tm_hour]

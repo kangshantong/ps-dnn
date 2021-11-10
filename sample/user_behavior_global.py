@@ -128,8 +128,8 @@ def gen_user_behavior_1day_global(user_behavior_dict_1day_global, user_behavior_
       btag = fields[2]
       cate = fields[3]
       brand = fields[4]
-      tm_year, tm_mon, tm_mday, workdayflag, tm_hour, tm_min_range = convert_time_stamp(time_stamp)
-      date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
+
+      date, tm_hour = convert_time_stamp(int(time_stamp))
 
       add_user_behavior_dict_1day_global(user_behavior_dict_1day_global,userid,date,btag,cate,brand)
       add_user_behavior_dict_1day_global_realtime(user_behavior_dict_1day_global_realtime,userid,date,time_stamp,btag,cate,brand)
@@ -212,8 +212,7 @@ def gen_user_feature_global_realtime(user_behavior_dict_1day_global_realtime, us
   latest_n_feas = []
   latest_1_fea = ""
 
-  tm_year, tm_mon, tm_mday, workdayflag, tm_hour, tm_min_range = convert_time_stamp(time_stamp)
-  date = (datetime.datetime(tm_year, tm_mon, tm_mday)).strftime('%Y%m%d')
+  date, tm_hour = convert_time_stamp(int(time_stamp))
 
   if userid not in user_behavior_dict_1day_global_realtime:
     return latest_n_feas, latest_1_fea

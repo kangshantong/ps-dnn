@@ -18,7 +18,7 @@ echo "gen global user behavior feature from behavior_log.csv"
 
 # 5.gen local user behavior feature from raw_sample.csv
 echo "gen local user behavior feature from raw_sample.csv"
-python3 user_behavior_local.py
+#python3 user_behavior_local.py
 
 # 6.join ad features & user profile & global user feature & local user feature with raw_sample_shuffle
 echo "join ad features & user profile & global user feature & local user feature with raw_sample_shuffle"
