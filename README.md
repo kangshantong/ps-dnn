@@ -9,6 +9,14 @@ This is a model training and prediction framework.
 
 4)it supports distributed training with ps-lite 
 
+We provide a demo in order to introduce how to use this framework.
+
+The dataset is taobao Ad Display/Click Data on Taobao.com(https://tianchi.aliyun.com/dataset/dataDetail?dataId=56) .
+
+sh run_taobao_ctr.sh
+
+This command will start the whole prodedure of taobao ctr prediction model.
+
 
 这是一个基于参数服务器（Parameter Server）PS-Lite的分布式深度学习训练和预测框架，特点如下：
 
