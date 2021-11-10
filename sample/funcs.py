@@ -69,7 +69,6 @@ def convert_time_stamp_v2(time_stamp):
 
   return str(date), str(hour)
 
-def minus_1hour(old_date, old_hour, new_time_stamp)
 if __name__ == '__main__':
   n=-1
   date = datetime.datetime(2017,5,6) + datetime.timedelta(days=n)
