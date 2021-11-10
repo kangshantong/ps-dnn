@@ -97,8 +97,8 @@ def feature_extract_stage2(intermediate_sample_file, sparse_dict_index_file, fin
 if __name__ == '__main__':
     version = sys.argv[1]
     min_fea_freq = int(sys.argv[2])
-    raw_sample_train_file = "../sample/final_data/train_data"
-    raw_sample_test_file = "../sample/final_data/test_data"
+    raw_sample_train_file = "../sample/final_data/train_data_shuf"
+    raw_sample_test_file = "../sample/final_data/test_data_shuf"
     intermediate_sample_train_file = "./data/intermediate_sample_train_" + version
     intermediate_sample_test_file = "./data/intermediate_sample_test_"  + version
     final_sample_train_file = "./data/final_sample_train_" + version

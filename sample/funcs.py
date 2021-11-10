@@ -46,14 +46,14 @@ def convert_time_stamp_v3(time_stamp):
 
   return date, tm_hour
 
-#返回的date为绝对日期，譬如"2017-05-13"
+#返回的date为绝对日期，譬如"20170513"
 #返回的hour为24小时制，范围【00，23】
 def convert_time_stamp(time_stamp):
   if time_stamp in dates:
     return dates[time_stamp], hours[time_stamp]
 
   time_str = datetime.datetime.fromtimestamp(int(time_stamp))
-  date = time_str.date().isoformat()
+  date = time_str.date().isoformat().replace("-", "")
   tm_hour = str(time_str.hour)
 
   dates[time_stamp] = date

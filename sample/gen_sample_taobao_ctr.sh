@@ -8,18 +8,21 @@ tar xvf ../orig/ad_feature.csv.tar.gz
 tar xvf ../orig/user_profile.csv.tar.gz
 cd -
 
-# 3. shuffle raw_sample
-shuf uncompress/raw_sample.csv -o final_data/raw_sample_shuffle.csv
-
-# 4.gen global user behavior feature from behavior_log.csv
+# 3.gen global user behavior feature from behavior_log.csv
 # Note: This step needs main memorys more than 64GB, you can skip it.
 echo "gen global user behavior feature from behavior_log.csv"
 # python3 user_behavior_global.py
 
-# 5.gen local user behavior feature from raw_sample.csv
+# 4.gen local user behavior feature from raw_sample.csv
 echo "gen local user behavior feature from raw_sample.csv"
 #python3 user_behavior_local.py
 
-# 6.join ad features & user profile & global user feature & local user feature with raw_sample_shuffle
-echo "join ad features & user profile & global user feature & local user feature with raw_sample_shuffle"
+# 5.join ad features & user profile & global user feature & local user feature with raw_sample
+echo "join ad features & user profile & global user feature & local user feature with raw_sample"
 python3 gen_sample.py
+
+# 6.shuffle train/test data
+echo "shuffle train/test data"
+shuf final_data/train_data -o final_data/train_data_shuf
+shuf final_data/test_data -o final_data/test_data_shuf
+

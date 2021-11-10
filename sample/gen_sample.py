@@ -190,7 +190,7 @@ if __name__ == '__main__':
 
 
   #raw_sample 格式:user,time_stamp,adgroup_id,pid,nonclk,clk
-  with open("final_data/raw_sample_shuffle.csv", 'r') as input_data, \
+  with open("uncompress/raw_sample.csv", 'r') as input_data, \
        open("final_data/train_data", 'w+') as train_data, \
        open("final_data/test_data", 'w+') as test_data:
     #第一行为格式说明，可以跳过
@@ -255,7 +255,7 @@ if __name__ == '__main__':
       gen_local_behavior_feas(sample, user_behavior_local_dict_realtime, ad_fea_dict, userid, time_stamp, adgroup_id, hours=168)
 
       #样本取自5月6号-13号，将13号的数据作为测试集，其他数据作为训练集
-      if date != "2017-05-13":
+      if date != "20170513":
         train_data.write("\t".join(sample))
         train_data.write("\n")
       else:
@@ -267,3 +267,4 @@ if __name__ == '__main__':
       count += 1
       if count % 10000 == 0:
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), " processed ", count, " samples")
+
