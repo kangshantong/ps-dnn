@@ -62,7 +62,7 @@ for ((i=0; i<${DMLC_NUM_WORKER}; ++i)); do
     export HEAPPROFILE=./W${i}
     echo "start worker $i"
     #time CPUPROFILE=tmp/prof_dist_${i}.out ${bin} worker ${net_conf} ${fea_conf} ${train_dir} ${test_dir} $i ${param2key} 2>&1|tee logs/${model}_${version}_${DMLC_NUM_SERVER}_${DMLC_NUM_WORKER}_worker_${i}.log &
-    time worker ${net_conf} ${fea_conf} ${train_dir} ${test_dir} $i ${param2key} 2>&1|tee logs/${model}_${version}_${DMLC_NUM_SERVER}_${DMLC_NUM_WORKER}_worker_${i}.log &
+    time ${bin} worker ${net_conf} ${fea_conf} ${train_dir} ${test_dir} $i ${param2key} 2>&1|tee logs/${model}_${version}_${DMLC_NUM_SERVER}_${DMLC_NUM_WORKER}_worker_${i}.log &
     sleep 0.5s
 done
 

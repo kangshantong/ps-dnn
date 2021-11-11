@@ -58,4 +58,5 @@ echo "Train the taobao ctr model:Local Mode"
 sh local_taobao_ctr.sh $version $model
 
 echo "Train the taobao ctr model:Distribute Mode"
+mkdir data/
 sh dist_multi_process_taobao_ctr.sh $version $model 
