@@ -2,6 +2,7 @@
 import ctypes
 import chardet
 import sys
+import time
 from gen_fea_dict import gen_fea_dict 
 
 #将python类型转换成c类型，支持int, float,string的变量和数组的转换
@@ -61,7 +62,7 @@ def feature_extract_stage1(raw_sample_file, intermediate_sample_file):
         raw_sample = f.readline()
         count += 1 
         if count%100000 == 0:
-          print("feature_extract_stage1: ", count, " samples processed")
+          print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ":feature_extract_stage1 ", count, " samples processed")
 
 def feature_extract_stage2(intermediate_sample_file, sparse_dict_index_file, final_sample_file):
     libfe = ctypes.cdll.LoadLibrary('./libfe.so')
@@ -92,7 +93,7 @@ def feature_extract_stage2(intermediate_sample_file, sparse_dict_index_file, fin
         intermediate_sample = f.readline()
         count += 1 
         if count%100000 == 0:
-          print("feature_extract_stage2: ", count, " samples processed")
+          print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ":feature_extract_stage2 ", count, " samples processed")
 
 if __name__ == '__main__':
     version = sys.argv[1]

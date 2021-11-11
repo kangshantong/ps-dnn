@@ -47,9 +47,9 @@ class Layer {
   virtual void set_grad_top(const Matrix* grad_top) {this->grad_top = grad_top;}
   //virtual void set_merge_grad_top(const Matrix merge_grad_top) {this->merge_grad_top=merge_grad_top; grad_top=&(this->merge_grad_top);}
 
-  virtual void gather_inputs() {}
+  virtual void gather_inputs();
 
-  virtual void split_grad_bottom() {}
+  virtual void split_grad_bottom();
 
   virtual void forward() {cerr << "This function shouldn't be called!!!" << endl; exit(1);}
 

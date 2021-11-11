@@ -9,6 +9,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lstdc++")
 
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/eigen")
 include_directories ("${PROJECT_SOURCE_DIR}/third_party/ps-lite/include")
+
 link_libraries("${PROJECT_SOURCE_DIR}/third_party/ps-lite/build/libps.a")
 link_libraries("${PROJECT_SOURCE_DIR}/third_party/ps-lite/deps/lib/libprotobuf-lite.so")
 link_libraries("${PROJECT_SOURCE_DIR}/third_party/ps-lite/deps/lib/libzmq.so")
