@@ -20,6 +20,7 @@ This command will start the whole prodedure of taobao ctr prediction model.
 
 这是一个基于参数服务器（Parameter Server）PS-Lite的分布式深度学习训练和预测框架，特点如下：
 
+
 1) 框架包含了从样本生成、特征抽取、模型训练到预测等一套完整的互联网深度学习落地流程
 
 2）非常轻量级，可以直接用于线上业务
@@ -27,6 +28,7 @@ This command will start the whole prodedure of taobao ctr prediction model.
 3）支持大量的特征抽取算子，譬如bucket/combine/group/hit等
 
 4）支持分布式训练，基于ps-lite
+
 
 代码结构：
 
@@ -45,6 +47,7 @@ model:模型训练
 
  ![image](https://user-images.githubusercontent.com/9473273/141041693-99bba636-1d3c-4206-952a-aa73dabb6c7d.png)
   
+	
 	从上述数据可以看出：
 	
 1）	改造为分布式后，1 server 1 worker的配置下，训练时间为545.2min，比单机模式的290.2min多了88%,auc相差无几。说明本文分布式改造带来的通信开销还是挺大的，但是训练的准确性是有保证的
