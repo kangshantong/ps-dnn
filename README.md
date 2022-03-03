@@ -1,4 +1,4 @@
-# ps-dnn
+# ps-dnn-一个基于参数服务器（Parameter Server）PS-Lite的分布式深度学习训练和预测框架
 This is a model training and prediction framework.
 
 1) It includes a complete set of processes such as sample generation, feature extraction, model training and prediction 
