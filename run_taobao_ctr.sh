@@ -4,7 +4,14 @@
 #prepare
 #.0. Download taqbao ad ctr dataset from https://tianchi.aliyun.com/dataset/dataDetail?dataId=56 to ./sample/orig/
 mkdir ./sample/orig/
-echo "!!!Please get dataset from  https://tianchi.aliyun.com/dataset/dataDetail?dataId=56 to ./sample/orig first"
+if [ ! -f "./sample/orig/behavior_log.csv.tar.gz" ]; then
+ echo "!!!原始样本文件不存在!!!"
+ echo "!!!Please get dataset(behavior_log.csv.tar.gz,raw_sample.csv.tar.gz,ad_feature.csv.tar.gz,user_profile.csv.tar.gz) from  https://tianchi.aliyun.com/dataset/dataDetail?dataId=56 to ./sample/orig first"
+ echo "!!!请从网址(https://tianchi.aliyun.com/dataset/dataDetail?dataId=56)首先下载四个文件(behavior_log.csv.tar.gz,raw_sample.csv.tar.gz,ad_feature.csv.tar.gz,user_profile.csv.tar.gz)到目录./sample/orig中"
+ exit 
+else
+ echo "原始样本文件存在"
+fi
 
 # 1. gen sample
 echo "1. gen sample"
@@ -56,7 +63,19 @@ make -j 10
 # 4. Train the taobao ctr model
 echo "Train the taobao ctr model:Local Mode"
 sh local_taobao_ctr.sh $version $model
+if [$? -eq 0];then
+    echo "Train the taobao ctr model:Local Mode successfully"
+else
+    "Train the taobao ctr model:Local Mode failed"
+    exit
+fi
 
 echo "Train the taobao ctr model:Distribute Mode"
 mkdir data/
 sh dist_multi_process_taobao_ctr.sh $version $model 
+if [$? -eq 0];then
+    echo "Train the taobao ctr model:Distribute Mode successfully"
+else
+    "Train the taobao ctr model:Distribute Mode failed"
+    exit
+fi
