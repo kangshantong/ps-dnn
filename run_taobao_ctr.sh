@@ -1,6 +1,8 @@
 #This is a demo for how to train a dnn model.
 #The dataset is taobao ad ctr dataset.
 
+pwd=$PWD
+echo $PWD
 #prepare
 #.0. Download taqbao ad ctr dataset from https://tianchi.aliyun.com/dataset/dataDetail?dataId=56 to ./sample/orig/
 mkdir ./sample/orig/
@@ -15,11 +17,10 @@ fi
 
 # 1. gen sample
 echo "1. gen sample"
-cd sample
+cd $pwd/sample
 mkdir ./uncompress
 mkdir ./final_data
 sh gen_sample_taobao_ctr.sh
-cd ../
 
 # 2. feature extract
 echo "2. feature extract"
@@ -27,14 +28,13 @@ version=v16
 model=fnn
 fea_min_freq=1
 
-cd feature_extract
+cd $pwd/feature_extract
 mkdir data
-sh fe_tao_ctr.sh $version $fea_min_freq
-cd ../
+sh fe_taobao_ctr.sh $version $fea_min_freq
 
 # 3. Compile the model training framework
 echo "3. Compile the model training framework"
-cd model/third_party
+cd $pwd/model/third_party
 eigen_dir="./eigen"
 pslite_dir="./ps-lite"
 
@@ -53,7 +53,7 @@ fi
 cd $pslite_dir
 make
 
-cd ../../
+cd $pwd/model/
 cd build
 mkdir logs/
 rm -fr CMake*

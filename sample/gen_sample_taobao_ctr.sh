@@ -25,16 +25,24 @@ echo "gen local user behavior feature from raw_sample.csv"
 
 # 5.join ad features & user profile & global user feature & local user feature with raw_sample
 echo "join ad features & user profile & global user feature & local user feature with raw_sample"
-python3 gen_sample.py
-if [$? -eq 0];then
-    echo "gen sample successfully"
+if [ ! -f "./final_data/train_data" ]; then
+    python3 gen_sample.py
+    if [ $? -eq 0 ];then
+        echo "gen sample successfully"
+    else
+        "gen sample failed"
+        exit
+    fi
 else
-    "gen sample failed"
-    exit
+    echo ""
 fi
 
 # 6.shuffle train/test data
 echo "shuffle train/test data"
-shuf final_data/train_data -o final_data/train_data_shuf
-shuf final_data/test_data -o final_data/test_data_shuf
+if [ ! -f "./final_data/train_data_shuf" ]; then
+    shuf final_data/train_data -o final_data/train_data_shuf
+    shuf final_data/test_data -o final_data/test_data_shuf
+else
+    echo ""
+fi
 
