@@ -63,7 +63,7 @@ make -j 10
 # 4. Train the taobao ctr model
 echo "Train the taobao ctr model:Local Mode"
 sh local_taobao_ctr.sh $version $model
-if [$? -eq 0];then
+if [ $? -eq 0 ];then
     echo "Train the taobao ctr model:Local Mode successfully"
 else
     "Train the taobao ctr model:Local Mode failed"
@@ -72,8 +72,8 @@ fi
 
 echo "Train the taobao ctr model:Distribute Mode"
 mkdir data/
-sh dist_multi_process_taobao_ctr.sh $version $model 
-if [$? -eq 0];then
+bash dist_multi_process_taobao_ctr.sh $version $model 
+if [ $? -eq 0 ];then
     echo "Train the taobao ctr model:Distribute Mode successfully"
 else
     "Train the taobao ctr model:Distribute Mode failed"
