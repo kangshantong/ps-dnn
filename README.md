@@ -1,4 +1,6 @@
 # ps-dnn-一个基于参数服务器（Parameter Server）PS-Lite的分布式深度学习训练和预测框架
+# 代码地址:https://github.com/kangshantong/ps-dnn 
+
 This is a model training and prediction framework.
 
 1) It includes a complete set of processes such as sample generation, feature extraction, model training and prediction 
@@ -58,4 +60,4 @@ model:模型训练
 
 整体而言，分布式训练相比于单机训练，在auc损失不大的情况下，换来了训练时间的大幅度下降。
 
-
+欢迎联系550941794@qq.com进行交流。
